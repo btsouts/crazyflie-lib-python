@@ -74,7 +74,7 @@ class PwmMotors():
         pk.data = struct.pack('<HHHH', pwmPercM1, pwmPercM2, pwmPercM3, pwmPercM4)
         self._cf.send_packet(pk)
 
-    def send_PWMsetpointAll(self, pwmPercM):
+    def send_PWMsetpointAll(self, pwmPercM, durationSec):
         """
         Send a new control setpoint for XXX
 
@@ -86,7 +86,7 @@ class PwmMotors():
 
         pk = CRTPPacket()
         pk.port = CRTPPort.PWM_SET
-        pk.data = struct.pack('<HHHH', pwmPercM, pwmPercM, pwmPercM, pwmPercM)
+        pk.data = struct.pack('<HL', pwmPercM, durationSec)
         self._cf.send_packet(pk)
 
     def send_stop_setpointGeneric(self):
