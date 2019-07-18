@@ -36,6 +36,10 @@ __author__ = 'BillTsou'
 __all__ = ['PwmMotors']
 
 TYPE_STOP = 0
+TYPE_STOP_MOTORS = 0
+TYPE_SET_EACH_MOTOR = 1
+TYPE_SET_ALL_MOTORS = 2
+TYPE_SET_SWEEP = 3
 
 class PwmMotors():
     """
@@ -70,7 +74,8 @@ class PwmMotors():
             raise ValueError('Thrust must be between 0 and 0xFFFF')
 
         pk = CRTPPacket()
-        pk.port = CRTPPort.PWM_SET
+        #pk.port = CRTPPort.PWM_SET
+        pk.set_header(CRTPPort.PWM_SET, TYPE_SET_EACH_MOTOR)
         pk.data = struct.pack('<HHHH', pwmPercM1, pwmPercM2, pwmPercM3, pwmPercM4)
         self._cf.send_packet(pk)
 
@@ -85,8 +90,23 @@ class PwmMotors():
             raise ValueError('Thrust must be between 0 and 0xFFFF')
 
         pk = CRTPPacket()
-        pk.port = CRTPPort.PWM_SET
+        #pk.port = CRTPPort.PWM_SET
+        pk.set_header(CRTPPort.PWM_SET, TYPE_SET_ALL_MOTORS)
         pk.data = struct.pack('<HL', pwmPercM, durationSec)
+        self._cf.send_packet(pk)
+
+    def send_PWMsweep(self, startPercM, endPercM, pwmPercMInc, durationSec):
+        """
+        Send a new control setpoint for XXX
+
+        The arguments roll/pitch/yaw/trust is the new setpoints that should
+        be sent to the copter
+        """
+
+        pk = CRTPPacket()
+        #pk.port = CRTPPort.PWM_SET
+        pk.set_header(CRTPPort.PWM_SET, TYPE_SET_SWEEP)
+        pk.data = struct.pack('<HHHL', startPercM, endPercM, pwmPercMInc, durationSec)
         self._cf.send_packet(pk)
 
     def send_stop_setpointGeneric(self):
@@ -103,6 +123,7 @@ class PwmMotors():
         Send STOP setpoing, stopping the motors and (potentially) falling.
         """
         pk = CRTPPacket()
-        pk.port = CRTPPort.PWM_SET
+        #pk.port = CRTPPort.PWM_SET
+        pk.set_header(CRTPPort.PWM_SET, TYPE_STOP_MOTORS)
         pk.data = struct.pack('<HHHH', 0, 0, 0, 0)
         self._cf.send_packet(pk)
